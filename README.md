@@ -2,6 +2,7 @@
 * [General info](#general-info)
 * [Technologies](#technologies)
 * [Setup](#setup)
+* [Logging](#logging)
 
 ## General info
 This project is a challenge to build a program that implements the following mower specification.
@@ -50,4 +51,28 @@ In order to run the integration test, use the following commands:
 $ git clone https://github.com/ESegundoRolon/mow-app.git
 $ cd mow-app
 $ mvn clean verify -P integration-test
+```
+
+## Logging
+
+By default there is only console logging activated. In order to activate the file appender, the log4j.properties file located on src/main/resources should be configured as follows:
+
+```
+# Root logger option
+log4j.rootLogger=DEBUG, stdout, file
+
+# Redirect log messages to console
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.Target=System.out
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %t %-5p %c{1}:%L - %m%n
+
+# Redirect log messages to a log file, support file rolling.
+log4j.appender.file=org.apache.log4j.RollingFileAppender
+log4j.appender.file.append=false
+log4j.appender.file.File=C:\\log4j-mow-application.log
+log4j.appender.file.MaxFileSize=5MB
+log4j.appender.file.MaxBackupIndex=10
+log4j.appender.file.layout=org.apache.log4j.PatternLayout
+log4j.appender.file.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %t %-5p %c{1}:%L - %m%n
 ```
