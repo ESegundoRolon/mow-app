@@ -30,6 +30,12 @@ $ mvn clean install
 $ java -jar ./target/mow-app-1.0-SNAPSHOT-jar-with-dependencies.jar file:/C:/System/example2.txt
 ```
 
+If the given input file has errors, you will see an output message as follows:
+
+```
+Exception in thread "main" com.mow.app.exception.InvalidFileFormatException: Mowers should not be overlapping
+```
+
 The unit test are run while the application is packaged using the maven install command. To run only unit test you must run the following commands:
 
 ```
