@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.mow.app.enums.MovementEnum;
+import com.mow.app.exception.BusinessException;
 import com.mow.app.exception.InvalidFileFormatException;
 import com.mow.app.model.behaviour.Movable;
 import com.mow.app.model.entity.Lawn;
@@ -36,7 +37,7 @@ public class SimulatorBuilder {
 	 *         simulation
 	 * @throws InvalidFileFormatException if there are overlaps between the mowers
 	 */
-	public Simulator buildSimulation(final List<String> lines) throws InvalidFileFormatException {
+	public Simulator buildSimulation(final List<String> lines) {
 
 		// Do not create simulator if something went wrong parsing
 		if (lines == null || lines.isEmpty()) {
@@ -65,7 +66,7 @@ public class SimulatorBuilder {
 
 			// Check if any movable object has same position
 			if (movables.stream().anyMatch(m -> m.getPosition().equals(movable.getPosition()))) {
-				throw new InvalidFileFormatException("Mowers should not be overlapping");
+				throw new BusinessException("Mowers should not be overlapping");
 			}
 
 			// Second line of the pair iteration corresponds to the movements

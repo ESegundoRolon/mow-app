@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 import com.mow.app.enums.DirectionEnum;
 import com.mow.app.enums.MovementEnum;
-import com.mow.app.exception.InvalidLawnException;
+import com.mow.app.exception.InvalidFileFormatException;
 import com.mow.app.model.behaviour.Movable;
 import com.mow.app.model.entity.LawnDimension;
 import com.mow.app.model.entity.Mower;;
@@ -43,7 +43,7 @@ public class LawnFileParser {
 	public static LawnDimension parseDimension(final String lawnDimensionLine) {
 
 		if (lawnDimensionLine == null || lawnDimensionLine.isBlank()) {
-			throw new InvalidLawnException("Dimensions line should not be null, empty or blank string");
+			throw new InvalidFileFormatException("Dimensions line should not be null, empty or blank string");
 		}
 
 		String[] tokens = lawnDimensionLine.split(" ");
@@ -55,7 +55,7 @@ public class LawnFileParser {
 			return LawnDimension.of(Integer.parseInt(tokens[0]), Integer.parseInt(tokens[1]));
 
 		} catch (NumberFormatException ex) {
-			throw new InvalidLawnException("Could not parse given alphanumeric string");
+			throw new InvalidFileFormatException("Could not parse given alphanumeric string");
 		}
 	}
 
@@ -69,7 +69,7 @@ public class LawnFileParser {
 	public static Movable parseMower(final String mowerLine, final LawnDimension dimension) {
 
 		if (mowerLine == null || dimension == null || mowerLine.isBlank()) {
-			throw new InvalidLawnException("Dimensions line should not be null, empty or blank string");
+			throw new InvalidFileFormatException("Dimensions line should not be null, empty or blank string");
 		}
 
 		String[] tokens = mowerLine.split(" ");
@@ -83,7 +83,7 @@ public class LawnFileParser {
 			return mower;
 
 		} catch (IllegalArgumentException ex) {
-			throw new InvalidLawnException("Could not parse given mower line or invalid initial positions");
+			throw new InvalidFileFormatException("Could not parse given mower line or invalid initial positions");
 		}
 	}
 
@@ -96,7 +96,7 @@ public class LawnFileParser {
 	public static List<MovementEnum> parseMovements(final String movementsLine) {
 
 		if (movementsLine == null || movementsLine.isBlank()) {
-			throw new InvalidLawnException("Movements line should not be null, empty or blank string");
+			throw new InvalidFileFormatException("Movements line should not be null, empty or blank string");
 		}
 
 		String[] tokens = movementsLine.split("");
@@ -106,7 +106,7 @@ public class LawnFileParser {
 			return Stream.of(tokens).map(MovementEnum::valueOf).collect(Collectors.toList());
 
 		} catch (IllegalArgumentException ex) {
-			throw new InvalidLawnException("Could not parse given movement line");
+			throw new InvalidFileFormatException("Could not parse given movement line");
 		}
 	}
 

@@ -17,10 +17,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
+import com.mow.app.exception.BusinessException;
+import com.mow.app.exception.InvalidFileException;
 import com.mow.app.exception.InvalidFileFormatException;
 import com.mow.app.simulation.SimulatorBuilder;
 
 public class AppIntegrationTest {
+
+	private static final String VALID_LAWN_FILE = "lawn.txt";
+	private static final String JSON_LAWN_FILE = "lawn.json";
+	private static final String OVERLAPPING_MOWERS_FILE = "lawn-overlap.txt";
+	private static final String INVALID_CONTRACT_LAWN_FILE = "lawn-invalid-dimension.txt";
+	private static final String INVALID_LINES_LAWN_FILE = "lawn-invalid-lines.txt";
 
 	@BeforeEach
 	void beforeEachTest() {
@@ -33,9 +41,9 @@ public class AppIntegrationTest {
 		System.out.println("=====================");
 	}
 
-	@RepeatedTest(500)
+	@RepeatedTest(100)
 	public void givenMain_withValidFile_thenVerifyOutput()
-			throws InvalidFileFormatException, URISyntaxException, MalformedURLException {
+			throws InvalidFileFormatException, URISyntaxException, MalformedURLException, InvalidFileException {
 
 		final TestAppender appender = new TestAppender();
 
@@ -48,7 +56,7 @@ public class AppIntegrationTest {
 			App app = new App(new SimulatorBuilder());
 
 			ClassLoader classLoader = getClass().getClassLoader();
-			File file = new File(classLoader.getResource("lawn.txt").getFile());
+			File file = new File(classLoader.getResource(VALID_LAWN_FILE).getFile());
 
 			app.run(file.toURI().toString());
 		}
@@ -80,23 +88,73 @@ public class AppIntegrationTest {
 	}
 
 	@Test
-	public void givenMain_withOverlappingInitialPosition_thenThrowInvalidFileException()
-			throws InvalidFileFormatException {
+	public void givenMain_withOverlappingInitialPosition_thenThrowBusinessException()
+			throws InvalidFileFormatException, InvalidFileException {
 
 		try {
 			ClassLoader classLoader = getClass().getClassLoader();
-			File file = new File(classLoader.getResource("lawn-invalid.txt").getFile());
+			File file = new File(classLoader.getResource(OVERLAPPING_MOWERS_FILE).getFile());
 
 			App app = new App(new SimulatorBuilder());
 			app.run(file.toURI().toString());
 
-			fail("Should throw InvalidFileFormatException when running app with invalid path");
+			fail("Should throw BusinessException when running app with overlapping mowers");
+		} catch (BusinessException e) {
+			// success
+		}
+
+	}
+
+	@Test
+	public void givenMain_withInvalidLines_thenThrowInvalidFileFormatException() throws InvalidFileException {
+
+		try {
+			ClassLoader classLoader = getClass().getClassLoader();
+			File file = new File(classLoader.getResource(INVALID_LINES_LAWN_FILE).getFile());
+
+			App app = new App(new SimulatorBuilder());
+			app.run(file.toURI().toString());
+
+			fail("Should throw InvalidFileFormatException when running app with invalid lawn file");
 		} catch (InvalidFileFormatException e) {
 			// success
 		}
 
 	}
 
+	@Test
+	public void givenMain_withInvalidContract_thenThrowInvalidFileException() {
+
+		try {
+			ClassLoader classLoader = getClass().getClassLoader();
+			File file = new File(classLoader.getResource(JSON_LAWN_FILE).getFile());
+
+			App app = new App(new SimulatorBuilder());
+			app.run(file.toURI().toString());
+
+			fail("Should throw InvalidFileException when running app with invalid input contract");
+		} catch (InvalidFileException e) {
+			// success
+		}
+
+	}
+
+	@Test
+	public void givenMain_withInvalidContract_thenThrowInvalidFileFormatException() throws InvalidFileException {
+
+		try {
+			ClassLoader classLoader = getClass().getClassLoader();
+			File file = new File(classLoader.getResource(INVALID_CONTRACT_LAWN_FILE).getFile());
+
+			App app = new App(new SimulatorBuilder());
+			app.run(file.toURI().toString());
+
+			fail("Should throw InvalidFileFormatException when running app with invalid input contract");
+		} catch (InvalidFileFormatException e) {
+			// success
+		}
+
+	}
 }
 
 /**

@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.mow.app.exception.BusinessException;
 import com.mow.app.exception.InvalidFileFormatException;
 
 public class SimulatorBuilderTest {
@@ -45,15 +46,15 @@ public class SimulatorBuilderTest {
 	}
 
 	@Test
-	public void givenBuildSimulation_withInvalidInitialPositions_thenThrowInvalidLawnException()
+	public void givenBuildSimulation_withInvalidInitialPositions_thenThrowBusinessException()
 			throws InvalidFileFormatException {
 		try {
 			SimulatorBuilder builder = new SimulatorBuilder();
 			List<String> lines = Arrays.asList("5 5", "1 1 N", "LFLFLFLFF", "1 1 E", "FFRFFRFRRF");
 
 			builder.buildSimulation(lines);
-			fail("Should throw InvalidFileFormatException when the initial position of the mowers overlap");
-		} catch (InvalidFileFormatException e) {
+			fail("Should throw BusinessException when the initial position of the mowers overlap");
+		} catch (BusinessException e) {
 			// success
 		}
 	}

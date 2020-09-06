@@ -15,8 +15,8 @@ import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
 
+import com.mow.app.exception.InvalidFileException;
 import com.mow.app.exception.InvalidFileFormatException;
-import com.mow.app.exception.InvalidLawnException;
 import com.mow.app.simulation.Simulator;
 import com.mow.app.simulation.SimulatorBuilder;
 
@@ -26,62 +26,84 @@ public class App {
 
 	private final SimulatorBuilder builder;
 	private static final String DEFAULT_FILE = "lawn.txt";
+	private static final String ALLOWED_EXTENSION = "txt";
 
 	App(final SimulatorBuilder builder) {
 		this.builder = builder;
 	}
 
-	public void run(final String path) throws InvalidFileFormatException {
+	public void run(final String path) throws InvalidFileException {
 
-		LOGGER.info("Starting run with path: " + path);
+		LOGGER.info("Starting app with path: " + path);
 
 		// Create initially the URL with the default file
 		URL systemResource = ClassLoader.getSystemResource(DEFAULT_FILE);
 		URI uri = URI.create(systemResource.toString());
-		LOGGER.info("Using input: " + systemResource.toString());
+		LOGGER.info("Using path input: " + systemResource.toString());
 
 		// if there is filePath as input, then override current URL
 		if (path != null && !path.isBlank()) {
+
+			// verify file extension
+			if (path.length() > 2) {
+
+				String extension = path.substring(path.lastIndexOf(".") + 1);
+				if (!ALLOWED_EXTENSION.equals(extension)) {
+					throw new InvalidFileException("File extension should be txt");
+				}
+
+			}
 			try {
 
 				uri = URI.create(path);
 
 			} catch (InvalidPathException ex) {
-				throw new InvalidLawnException("Input path could not be found or has invalid format");
+
+				LOGGER.error("Invalid input path of file: " + path);
+				throw new InvalidFileException("Input path could not be found or has invalid format", ex);
 			}
 		}
 
+		// open file system to access file
 		FileSystem fs = null;
 		try {
+
 			fs = FileSystems.newFileSystem(uri, Collections.emptyMap());
 
 		} catch (IOException ex) {
+
 			LOGGER.error("Error opening file system");
+
 		} catch (IllegalArgumentException ex) {
-			// return default fs
+			// it could fail on some OS, then return default fs
 			fs = FileSystems.getDefault();
 		}
 
+		// create path from normalised URI
 		Path systemPath = Paths.get(uri);
 
+		// iterate each file lines
 		try (Stream<String> lines = Files.lines(systemPath)) {
 
 			Simulator simulation = this.builder.buildSimulation(lines.collect(Collectors.toList()));
 			simulation.startSimulation();
-			fs.close();
-		} catch (IOException ex) {
-			LOGGER.error("Error getting lines from file resource", ex);
 
-			throw new InvalidLawnException("Could not parse lines of given file");
+		} catch (IOException ex) {
+
+			LOGGER.error("Error getting lines from file resource", ex);
+			throw new InvalidFileException("Could not parse lines of given file", ex);
+
 		} catch (UnsupportedOperationException ex) {
-			LOGGER.error("Error closing file system");
+			LOGGER.warn("Error closing file system");
 		} finally {
 			try {
+				// once the simulation finish or crashed, close fs
 				if (fs != null) {
 					fs.close();
 				}
 			} catch (IOException | UnsupportedOperationException ex) {
-				LOGGER.error("Error closing file system");
+				// the fs close could fail on test environments
+				LOGGER.warn("Error closing file system");
 			}
 		}
 	}
@@ -91,8 +113,9 @@ public class App {
 	 * 
 	 * @param args with optional path
 	 * @throws InvalidFileFormatException
+	 * @throws InvalidFileException
 	 */
-	public static void main(final String[] args) throws InvalidFileFormatException {
+	public static void main(final String[] args) throws InvalidFileException {
 
 		String filePath = null;
 		if (args.length > 0) {
